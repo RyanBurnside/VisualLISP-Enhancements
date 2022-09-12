@@ -103,16 +103,20 @@
         ((string? exp) true)
         (else false)))
 
+
 ;; Variables are represented by symbols
 (defun variable? (exp)
   (symbol? exp))
+
 
 ;; Quotations have the form (quote <text-of-quotation>)
 (defun quoted? (exp)
   (tagged-list? exp 'quote))
 
+
 (defun text-of-quotation (exp)
         (cadr exp))
+
 
 (defun tagged-list? (exp tag)
   (if (pair? exp)
@@ -123,9 +127,13 @@
 (defun assignment? (exp)
   (tagged-list? exp 'set!))
 
-(defun assignment-variable (exp) (cadr exp))
 
-(defun assignment-value (exp) (caddr exp))
+(defun assignment-variable (exp)
+  (cadr exp))
+
+
+(defun assignment-value (exp)
+  (caddr exp))
 
 ;; Definitions have the form (define <var> value)
 ;; or the form (define (<var> <parameter> ...) <body>)
@@ -133,10 +141,12 @@
 (defun definition? (exp)
   (tagged-list? exp 'define))
 
+
 (defun definition-variable (exp)
   (if (symbol? (cadr exp))
     (cadr exp)
     (caadr exp)))
+
 
 (defun definition-value (exp)
   (if (symbol? (cadr exp))
@@ -144,14 +154,18 @@
     (make-lambda (cdadr exp) ; formal parameters
       (cddr exp)))) ; body
 
+
 (defun lambda? (exp)
   (tagged-list? exp 'lambda))
+
 
 (defun lambda-parameters (exp)
   (cadr exp))
 
+
 (defun lambda-body (exp)
   (cddr exp))
+
 
 (defun make-lambda (paramters body)
   (cons 'lambda (cons parameters body)))
@@ -161,11 +175,14 @@
 (defun if? (exp)
   (tagged-list? exp 'if))
 
+
 (defun if-predicate? (exp)
   (cadr exp))
 
+
 (defun if-consequent (exp)
   (caddr exp))
+
 
 (defun if-alternative (exp)
   (if (not (null? (cdddr exp)))
@@ -177,20 +194,26 @@
 (defun make-if (predicate consequent alternative)
   (list 'if predicate consequent alternative))
 
+
 (defun begin? (exp)
   (tagged-list? exp 'begin))
+
 
 (defun begin-actions (exp)
   (cdr exp))
 
+
 (defun last-exp? (seq)
   (null? (cdr seq)))
+
 
 (defun first-exp (seq)
   (car seq))
 
+
 (defun rest-exps (seq)
   (cdr seq))
+
 
 ;; turns a sequence into begin
 (defun sequence->exp (seq)
@@ -199,45 +222,59 @@
         (else
          (make-begin seq))))
 
+
 (defun make-begin (seq)
   (cons 'begin seq))
+
 
 (defun application? (exp)
   (pair? exp))
 
+
 (defun operator (exp)
   (car exp))
+
 
 (defun operands (exp)
   (cdr exp))
 
+
 (defun no-operands? (ops)
   (null ops))
+
 
 (defun first-operand (ops)
   (car ops))
 
+
 (defun rest-operands (ops)
   (cdr ops))
+
 
 ;; Building the if expander for cond
 (defun cond? (exp)
   (tagged-list? exp 'cond))
 
+
 (defun cond-clauses (exp)
   (cdr exp))
+
 
 (defun cond-else-clause? (clause)
   (eq? (cond-predicate clause) 'else))
 
+
 (defun cond-predicate (clause)
   (car clause))
+
 
 (defun cond-actions (clause)
   (cdr clause))
 
+
 (defun cond->if (exp)
   (expand-clauses (cond-clauses exp)))
+
 
 (defun expand-clauses (clauses)
   (if (null? clauses)

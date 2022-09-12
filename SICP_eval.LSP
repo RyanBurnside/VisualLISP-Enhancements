@@ -38,8 +38,8 @@
          (make-procedure (lambda-parameters exp)
                          (lambda-body exp)
                          env))
-        ((progn? exp) ; BEGIN in SICP but progn in VisualLISP
-         (eval-sequence (progn-actions exp) env))
+        ((begin? exp)
+         (eval-sequence (begin-actions exp) env))
         ((cond? exp) (eval (cond->if exp) env))
         ((application? exp)
          (apply (eval (operator exp) env)
@@ -289,4 +289,66 @@
         (make-if (cond-predicate first)
                  (dequence->exp (cond-actions first))
                  (expand-clauses rest))))))
+
+;;; truth and falsehood
+
+(defun true? (x)
+  (not (eq? x false)))
+
+(defun false? (x)
+  (eq? x false))
+
+
+;;; Representing procedures
+
+(defun make-procedure (parameters body env)
+  (list 'procedure parameters body env))
+
+(defun compound-procedure? (p)
+  (tagged-list? p 'procedure))
+
+(defun procedure-parameters (p)
+  (cadr p))
+
+(defun procedure-body (p)
+  (caddr p))
+
+(defun procedure-environment (p)
+  (cadddr p))
+
+
+;;; Operations on Environments
+;; A list of frames containing tables wrapped in a parent environment
+
+(defun (enclosing-environment env)
+       (cdr env))
+
+(defun first-frame (env)
+  (car env))
+
+(defun the-empty-environment '())
+
+;; Each frame of an environment is a pair of lists. A lost of variables bound in that frame and a list of the associated values
+
+(defun make-frame (variables values)
+  (cons variables values))
+
+(defun frame-variables (frame)
+  (car frame))
+
+(defun frame-values (frame)
+  (cdr frame))
+
+(defun add-binding-to-frame! (var val frame)
+  (set-car! frame (cons var (car frame)))
+  (set-cdr! frame (cons val (cdr frame))))
+
+(defun extend-environment (vars vals base-env)
+  (if (= (length vars) (length vals))
+    (cons (make-frame vars vals) base-env)
+    (if (< (length vars) (length vals))
+      (error "Too many arguments supplied" vars vals)
+      (effor "Too few arguments suplied" vars vals))))
+
+
 
